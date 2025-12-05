@@ -1,0 +1,161 @@
+{% extends 'mqtt_tester/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>Scan Session: {{ session.host }}:{{ session.port }}</h2>
+        <p class="text-muted">Started: {{ session.created_at }} | Status: 
+            <span class="badge bg-{% if session.status == 'completed' %}success{% else %}warning{% endif %}">
+                {{ session.status }}
+            </span>
+        </p>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>📡 Discovered Topics ({{ topics.count }})</h5>
+            </div>
+            <div class="card-body">
+                {% if topics %}
+                    <div class="row">
+                        {% for topic in topics %}
+                        <div class="col-md-6 mb-2">
+                            <code>{{ topic.topic }}</code>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No topics discovered yet...</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>📨 Recent Messages</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_messages %}
+                    <div class="terminal p-3" style="max-height: 400px; overflow-y: auto;">
+                        {% for msg in recent_messages %}
+                        <div class="mb-1">
+                            <span class="text-info">{{ msg.timestamp|date:"H:i:s" }}</span>
+                            <span class="text-warning">{{ msg.topic }}</span>: 
+                            {{ msg.payload|truncatechars:100 }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No messages intercepted yet...</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>🎯 Attack Tests</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Injection Test</label>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="inject-topic" placeholder="Topic">
+                    </div>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="inject-payload" placeholder="Payload">
+                    </div>
+                    <button class="btn btn-warning btn-sm" onclick="testInjection()">Test Injection</button>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Flood Attack</label>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="flood-topic" placeholder="Topic">
+                    </div>
+                    <div class="input-group mb-2">
+                        <input type="number" class="form-control" id="flood-count" placeholder="Count" value="100">
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="testFlood()">Start Flood</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>📊 Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'mqtt_tester:session_results' session.id %}" class="btn btn-primary btn-sm">
+                    View Test Results
+                </a>
+                <a href="{% url 'mqtt_tester:index' %}" class="btn btn-secondary btn-sm">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function testInjection() {
+    const topic = document.getElementById('inject-topic').value;
+    const payload = document.getElementById('inject-payload').value;
+    
+    if (!topic || !payload) {
+        alert('Please enter both topic and payload');
+        return;
+    }
+    
+    fetch('{% url "mqtt_tester:inject_message" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            session_id: {{ session.id }},
+            topic: topic,
+            payload: payload
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Injection test completed successfully');
+        } else {
+            alert('Injection test failed');
+        }
+    });
+}
+
+function testFlood() {
+    const topic = document.getElementById('flood-topic').value;
+    const count = document.getElementById('flood-count').value;
+    
+    if (!topic) {
+        alert('Please enter a topic');
+        return;
+    }
+    
+    fetch('{% url "mqtt_tester:flood_attack" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            session_id: {{ session.id }},
+            topic: topic,
+            count: parseInt(count)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Flood attack completed');
+        } else {
+            alert('Flood attack failed');
+        }
+    });
+}
+</script>
+{% endblock %}

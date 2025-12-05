@@ -1,0 +1,42 @@
+{% extends 'mqtt_tester/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>🔍 Start New MQTT Security Scan</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="host" class="form-label">Target Host/IP</label>
+                        <input type="text" class="form-control" id="host" name="host" 
+                               placeholder="192.168.1.100 or test.mosquitto.org" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="port" class="form-label">Port</label>
+                        <input type="number" class="form-control" id="port" name="port" 
+                               value="1883" min="1" max="65535">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="duration" class="form-label">Scan Duration (seconds)</label>
+                        <input type="number" class="form-control" id="duration" name="duration" 
+                               value="30" min="10" max="300">
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Warning:</strong> Only test systems you own or have permission to test.
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Start Scan</button>
+                    <a href="{% url 'mqtt_tester:index' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

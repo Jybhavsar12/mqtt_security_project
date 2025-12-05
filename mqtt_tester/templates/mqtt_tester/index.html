@@ -1,0 +1,93 @@
+{% extends 'mqtt_tester/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1>MQTT Security Testing Dashboard</h1>
+        <p class="lead">Educational tool for testing MQTT broker vulnerabilities</p>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Quick Start</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'mqtt_tester:start_scan' %}" class="btn btn-primary btn-lg">
+                    🔍 Start New Scan
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Recent Scan Sessions</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_sessions %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Target</th>
+                                    <th>Status</th>
+                                    <th>Started</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in recent_sessions %}
+                                <tr>
+                                    <td>{{ session.host }}:{{ session.port }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if session.status == 'completed' %}success{% else %}warning{% endif %}">
+                                            {{ session.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ session.created_at|date:"M d, H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'mqtt_tester:session_detail' session.id %}" class="btn btn-sm btn-outline-primary">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No scan sessions yet. Start your first scan!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>⚠️ Legal Notice</h5>
+            </div>
+            <div class="card-body">
+                <p class="small text-warning">
+                    This tool is for educational and authorized testing only. 
+                    Only use on systems you own or have explicit permission to test.
+                </p>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>🎯 Test Features</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li>✓ Anonymous access testing</li>
+                    <li>✓ Topic discovery</li>
+                    <li>✓ Message interception</li>
+                    <li>✓ Injection testing</li>
+                    <li>✓ Flood attacks</li>
+                    <li>✓ Results export</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
