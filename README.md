@@ -13,7 +13,7 @@ A comprehensive Django-based web application for testing MQTT broker security vu
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/Jybhavsar12/mqtt_security_project.git
 cd mqtt_security_project
 ```
 
